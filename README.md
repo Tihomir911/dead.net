@@ -3,7 +3,7 @@
 <h3 align="center">Know where the signal dies.</h3>
 
 <p align="center">
-  <img src="assets/readme-banner.png" width="100%" alt="dead.net banner">
+  <img src="assets/readme-banner.jpg" width="100%" alt="dead.net banner">
 </p>
 
 <p align="center">
