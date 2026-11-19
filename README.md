@@ -37,8 +37,7 @@ Explore network performance, track connection quality, and discover dead zones t
 | 🟩 | Good |
 | 🟡 | Average |
 | 🟠 | Poor |
-| 🔴 | Critical |
-| ⚫ | No Signal |
+| 🔴 | No Signal |
 
 ## 📱 Platforms
 
