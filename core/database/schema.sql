@@ -1,0 +1,1 @@
+-- DEAD.NET: SQLite schema. TODO: define tables after agreeing on the data format.
