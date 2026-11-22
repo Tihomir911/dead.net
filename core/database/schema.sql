@@ -19,9 +19,7 @@ CREATE TABLE measurements (
     FOREIGN KEY(session_id) REFERENCES daily_sessions(id)
 );
 
-INSERT INTO measurements (id , session_id , connection_type)
 
-VALUES (2 , 2 , 'LTE')
 
 
 
