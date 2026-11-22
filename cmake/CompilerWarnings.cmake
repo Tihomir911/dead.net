@@ -1,8 +1,8 @@
-function(deadnet_enable_warning target)
+function(deadnet_enable_warnings target)
     if(MSVC)
         target_compile_options(${target} PRIVATE
             /W4
-            /permissive-    
+            /permissive-
         )
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         target_compile_options(${target} PRIVATE
