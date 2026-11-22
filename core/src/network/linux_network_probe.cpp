@@ -1,5 +1,6 @@
 #include "deadnet/network/linux_network_probe.hpp"
 
+#include <net/if.h>
 #include <ifaddrs.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
