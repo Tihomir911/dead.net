@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include "deadnet/network/network_measurement.hpp"
+
 namespace deadnet::network {
 
 enum class NetworkQuality : std::uint8_t {
@@ -11,5 +13,9 @@ enum class NetworkQuality : std::uint8_t {
     Fair,
     Poor
 };
+
+NetworkQuality evaluateNetworkQuality(
+    const NetworkMeasurement& measurement
+);
 
 }
