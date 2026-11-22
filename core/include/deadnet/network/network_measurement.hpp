@@ -18,6 +18,8 @@ struct NetworkMeasurement {
 
     double latencyMs{0.0};
 
+    double jitterMs{0.0};
+
     double packetLossPercent{0.0};
 
     double downloadMbps{0.0};
