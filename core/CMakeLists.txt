@@ -1,6 +1,7 @@
 
 add_library(deadnet_core STATIC
     src/common/version.cpp
+    src/network/network_quality.cpp
 )
 
 target_include_directories(deadnet_core
