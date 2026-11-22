@@ -1,5 +1,6 @@
+
 add_library(deadnet_core STATIC
-    src/common/vercion.cpp
+    src/common/version.cpp
 )
 
 target_include_directories(deadnet_core
@@ -9,4 +10,22 @@ target_include_directories(deadnet_core
 )
 
 deadnet_configure_project(deadnet_core)
-dednet_enable_warnings(deadnet_core)
+deadnet_enable_warnings(deadnet_core)
+
+if(BUILD_TESTING)
+    add_executable(deadnet_version_test
+        tests/common/version_test.cpp
+    )
+
+    target_link_libraries(deadnet_version_test
+        PRIVATE deadnet_core
+    )
+
+    deadnet_configure_project(deadnet_version_test)
+    deadnet_enable_warnings(deadnet_version_test)
+
+    add_test(
+        NAME deadnet.version
+        COMMAND deadnet_version_test
+    )
+endif()
