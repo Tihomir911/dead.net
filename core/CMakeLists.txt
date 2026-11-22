@@ -1,8 +1,13 @@
-
 add_library(deadnet_core STATIC
     src/common/version.cpp
     src/network/network_quality.cpp
 )
+
+ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        target_sources(deadnet_core PRIVATE
+            src/network/linux_network_probe.cpp
+        )
+    endif()
 
 target_include_directories(deadnet_core
     PUBLIC
