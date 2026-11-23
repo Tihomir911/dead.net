@@ -1,7 +1,6 @@
 #pragma once
 
-#include <string>
-
+#include "deadnet/network/connection_info.hpp"
 #include "deadnet/network/network_probe.hpp"
 
 namespace deadnet::network {
@@ -11,8 +10,7 @@ public:
     NetworkMeasurement measure() override;
 
 private:
-    std::string getActiveInterface() const;
-    std::string getLocalIpAddress() const;
+    ConnectionInfo getConnectionInfo() const;
 };
 
 }

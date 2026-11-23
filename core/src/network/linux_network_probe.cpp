@@ -1,63 +1,56 @@
+
 #include "deadnet/network/linux_network_probe.hpp"
 
-#include <net/if.h>
-#include <ifaddrs.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
+#include <ifaddrs.h>
+#include <net/if.h>
+#include <netinet/in.h>
 
+#include <chrono>
+#include <memory>
 #include <string>
 
 namespace deadnet::network {
 
-std::string LinuxNetworkProbe::getActiveInterface() const {
-    struct ifaddrs* interfaces = nullptr;
+namespace {
 
-    if (getifaddrs(&interfaces) == -1) {
-        return {};
+ConnectionType detectConnectionType(const std::string& interfaceName) {
+    if (interfaceName.starts_with("wl")) {
+        return ConnectionType::WiFi;
     }
 
-    std::string result;
-
-    for (const auto* current = interfaces;
-         current != nullptr;
-         current = current->ifa_next) {
-
-        if (current->ifa_addr == nullptr) {
-            continue;
-        }
-
-        if (current->ifa_addr->sa_family != AF_INET) {
-            continue;
-        }
-
-        if ((current->ifa_flags & IFF_UP) == 0 ||
-            (current->ifa_flags & IFF_LOOPBACK) != 0) {
-            continue;
-        }
-
-        result = current->ifa_name;
-        break;
+    if (interfaceName.starts_with("eth") || interfaceName.starts_with("en")) {
+        return ConnectionType::Ethernet;
     }
 
-    freeifaddrs(interfaces);
+    if (interfaceName.starts_with("wwan")) {
+        return ConnectionType::Cellular;
+    }
 
-    return result;
+    return ConnectionType::Unknown;
 }
 
-std::string LinuxNetworkProbe::getLocalIpAddress() const {
-    struct ifaddrs* interfaces = nullptr;
+}
 
-    if (getifaddrs(&interfaces) == -1) {
+ConnectionInfo LinuxNetworkProbe::getConnectionInfo() const {
+    struct ifaddrs* rawInterfaces = nullptr;
+
+    if (getifaddrs(&rawInterfaces) == -1) {
         return {};
     }
 
-    std::string result;
+    std::unique_ptr<ifaddrs, decltype(&freeifaddrs)> interfaces(
+        rawInterfaces,
+        &freeifaddrs
+    );
 
-    for (const auto* current = interfaces;
+    ConnectionInfo result{};
+
+    for (const auto* current = interfaces.get();
          current != nullptr;
          current = current->ifa_next) {
 
-        if (current->ifa_addr == nullptr) {
+        if (current->ifa_addr == nullptr || current->ifa_name == nullptr) {
             continue;
         }
 
@@ -65,8 +58,7 @@ std::string LinuxNetworkProbe::getLocalIpAddress() const {
             continue;
         }
 
-        if ((current->ifa_flags & IFF_UP) == 0 ||
-            (current->ifa_flags & IFF_LOOPBACK) != 0) {
+        if ((current->ifa_flags & IFF_UP) == 0 || (current->ifa_flags & IFF_LOOPBACK) != 0) {
             continue;
         }
 
@@ -75,20 +67,33 @@ std::string LinuxNetworkProbe::getLocalIpAddress() const {
 
         char buffer[INET_ADDRSTRLEN]{};
 
-        if (inet_ntop(AF_INET, &address->sin_addr,
-                      buffer, sizeof(buffer)) != nullptr) {
-            result = buffer;
-            break;
+        if (inet_ntop(
+                AF_INET,
+                &address->sin_addr,
+                buffer,
+                sizeof(buffer)
+            ) == nullptr) {
+            continue;
         }
-    }
 
-    freeifaddrs(interfaces);
+        result.networkName = current->ifa_name;
+        result.ipAddress = buffer;
+
+        break;
+    }
 
     return result;
 }
 
 NetworkMeasurement LinuxNetworkProbe::measure() {
     NetworkMeasurement measurement{};
+
+    measurement.timestamp = std::chrono::system_clock::now();
+
+    const ConnectionInfo connection = getConnectionInfo();
+
+    measurement.connectionType =
+        detectConnectionType(connection.networkName);
 
     return measurement;
 }
