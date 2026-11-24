@@ -16,10 +16,37 @@ CREATE TABLE measurements (
     connection_type TEXT,
     measured_at TEXT,
     session_id INTEGER,
+    
     FOREIGN KEY(session_id) REFERENCES daily_sessions(id)
 );
 
+CREATE TABLE dead_zones (
+    id INTEGER PRIMARY KEY,
+    latitude REAL,
+    longitude REAL,
+    measured_at TEXT,
+    measurement_id INTEGER,
+    FOREIGN KEY(measurement_id) REFERENCES measurements(id)
+);
 
+CREATE TABLE map_aggregates (
+    id INTEGER PRIMARY KEY,
+    latitude REAL,
+    longitude REAL,
+    download_mbps REAL,
+    upload_mbps REAL,
+    ping_ms INTEGER,
+    jitter_ms INTEGER,
+    packet_loss_percent REAL,
+    connection_type TEXT,
+    measured_at TEXT,
+    aggregates_id INTEGER,
+    FOREIGN KEY(aggregates_id) REFERENCES measurements(id)
+);
 
-
+CREATE TABLE settings (
+    id INTEGER PRIMARY KEY,
+    background_monitoring INTEGER,
+    measurement_interval INTEGER 
+);
 
