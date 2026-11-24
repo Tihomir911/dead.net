@@ -79,8 +79,7 @@ ConnectionType detectConnectionType(
         return ConnectionType::WiFi;
     }
 
-    if (interfaceName.starts_with("eth") ||
-        interfaceName.starts_with("en")) {
+    if (interfaceName.starts_with("eth") || interfaceName.starts_with("en")) {
         return ConnectionType::Ethernet;
     }
 
@@ -286,8 +285,7 @@ ConnectionInfo LinuxNetworkProbe::getConnectionInfo() const {
          current != nullptr;
          current = current->ifa_next) {
 
-        if (current->ifa_addr == nullptr ||
-            current->ifa_name == nullptr) {
+        if (current->ifa_addr == nullptr || current->ifa_name == nullptr) {
             continue;
         }
 
@@ -295,8 +293,7 @@ ConnectionInfo LinuxNetworkProbe::getConnectionInfo() const {
             continue;
         }
 
-        if ((current->ifa_flags & IFF_UP) == 0 ||
-            (current->ifa_flags & IFF_LOOPBACK) != 0) {
+        if ((current->ifa_flags & IFF_UP) == 0 || (current->ifa_flags & IFF_LOOPBACK) != 0) {
             continue;
         }
 
