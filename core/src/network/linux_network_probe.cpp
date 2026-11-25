@@ -165,10 +165,7 @@ std::optional<double> pingTarget(
             return std::nullopt;
         }
 
-        if (!waitForReply(
-                socketFd,
-                static_cast<int>(remaining)
-            )) {
+        if (!waitForReply(socketFd, static_cast<int>(remaining))) {
             return std::nullopt;
         }
 
@@ -197,9 +194,7 @@ std::optional<double> pingTarget(
         const auto* reply =
             reinterpret_cast<const icmphdr*>(buffer.data());
 
-        if (reply->type != ICMP_ECHOREPLY ||
-            reply->code != 0 ||
-            ntohs(reply->un.echo.sequence) != sequence) {
+        if (reply->type != ICMP_ECHOREPLY || reply->code != 0 || ntohs(reply->un.echo.sequence) != sequence) {
             continue;
         }
 
@@ -281,9 +276,7 @@ ConnectionInfo LinuxNetworkProbe::getConnectionInfo() const {
 
     ConnectionInfo result{};
 
-    for (const auto* current = interfaces.get();
-         current != nullptr;
-         current = current->ifa_next) {
+    for (const auto* current = interfaces.get(); current != nullptr; current = current->ifa_next) {
 
         if (current->ifa_addr == nullptr || current->ifa_name == nullptr) {
             continue;
@@ -347,9 +340,7 @@ NetworkMeasurement LinuxNetworkProbe::measure() {
             ++successfulPings;
         }
 
-        for (std::size_t i = 1;
-             i < statistics.latencies.size();
-             ++i) {
+        for (std::size_t i = 1; i < statistics.latencies.size(); ++i) {
 
             totalJitter += std::abs(
                 statistics.latencies[i] -
