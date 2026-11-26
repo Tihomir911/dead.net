@@ -21,6 +21,8 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <cmath>
+#include <optional>
 
 namespace deadnet::network {
 
