@@ -49,11 +49,7 @@ struct SpeedTestResult {
 
     bool success{false};
 
-    std::string error;
-
-    std::string server;
-
-    std::chrono::system_clock::time_point timestamp{};
+    double durationMs{0.0};
 
     double downloadMbps{0.0};
 
@@ -65,11 +61,16 @@ struct SpeedTestResult {
 
     double packetLossPercent{0.0};
 
+    std::string error;
+
+    std::string server;
+
+    std::chrono::system_clock::time_point timestamp{};
+
     std::uint64_t downloadedBytes{0};
 
     std::uint64_t uploadedBytes{0};
 
-    double durationMs{0.0};
 };
 
 using SpeedTestProgressCallback =
