@@ -74,9 +74,8 @@ private:
     int descriptor_;
 };
 
-ConnectionType detectConnectionType(
-    const std::string& interfaceName
-) {
+ConnectionType detectConnectionType( const std::string& interfaceName ) {
+
     if (interfaceName.starts_with("wl")) {
         return ConnectionType::WiFi;
     }
@@ -99,11 +98,7 @@ bool waitForReply(int socketFd, int timeoutMs) {
     descriptor.events = POLLIN;
 
     while (true) {
-        const int result = poll(
-            &descriptor,
-            1,
-            timeoutMs
-        );
+        const int result = poll( &descriptor, 1, timeoutMs );
 
         if (result > 0) {
             if ((descriptor.revents & POLLIN) != 0) {
@@ -123,32 +118,19 @@ bool waitForReply(int socketFd, int timeoutMs) {
     }
 }
 
-std::optional<double> pingTarget(
-    int socketFd,
-    const sockaddr_in& target,
-    std::uint16_t sequence
-) {
+std::optional<double> pingTarget(int socketFd, const sockaddr_in& target, std::uint16_t sequence) {
     IcmpPacket packet{};
 
     packet.header.type = ICMP_ECHO;
     packet.header.code = 0;
 
-    packet.header.un.echo.id = htons(
-        static_cast<std::uint16_t>(getpid() & 0xFFFF)
-    );
+    packet.header.un.echo.id = htons(static_cast<std::uint16_t>(getpid() & 0xFFFF));
 
     packet.header.un.echo.sequence = htons(sequence);
 
     const auto started = Clock::now();
 
-    const ssize_t sent = sendto(
-        socketFd,
-        &packet,
-        sizeof(packet),
-        0,
-        reinterpret_cast<const sockaddr*>(&target),
-        sizeof(target)
-    );
+    const ssize_t sent = sendto(socketFd, &packet, sizeof(packet), 0, reinterpret_cast<const sockaddr*>(&target), sizeof(target));
 
     if (sent != static_cast<ssize_t>(sizeof(packet))) {
         return std::nullopt;
@@ -159,9 +141,7 @@ std::optional<double> pingTarget(
 
     while (Clock::now() < deadline) {
         const auto remaining =
-            std::chrono::duration_cast<std::chrono::milliseconds>(
-                deadline - Clock::now()
-            ).count();
+            std::chrono::duration_cast<std::chrono::milliseconds>(deadline - Clock::now()).count();
 
         if (remaining <= 0) {
             return std::nullopt;
@@ -176,14 +156,7 @@ std::optional<double> pingTarget(
         sockaddr_in source{};
         socklen_t sourceLength = sizeof(source);
 
-        const ssize_t received = recvfrom(
-            socketFd,
-            buffer.data(),
-            buffer.size(),
-            MSG_DONTWAIT,
-            reinterpret_cast<sockaddr*>(&source),
-            &sourceLength
-        );
+        const ssize_t received = recvfrom(socketFd, buffer.data(), buffer.size(), MSG_DONTWAIT, reinterpret_cast<sockaddr*>(&source), &sourceLength);
 
         if (received < static_cast<ssize_t>(sizeof(icmphdr))) {
             continue;
@@ -202,9 +175,7 @@ std::optional<double> pingTarget(
 
         const auto elapsed = Clock::now() - started;
 
-        return std::chrono::duration<double, std::milli>(
-            elapsed
-        ).count();
+        return std::chrono::duration<double, std::milli>(elapsed).count();
     }
 
     return std::nullopt;
@@ -213,13 +184,7 @@ std::optional<double> pingTarget(
 PingStatistics measureTarget(const char* address) {
     PingStatistics statistics{};
 
-    Socket socketHandle(
-        socket(
-            AF_INET,
-            SOCK_DGRAM | SOCK_CLOEXEC,
-            IPPROTO_ICMP
-        )
-    );
+    Socket socketHandle(socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_ICMP));
 
     if (socketHandle.get() == -1) {
         statistics.attempts = PING_ATTEMPTS;
@@ -230,11 +195,7 @@ PingStatistics measureTarget(const char* address) {
 
     target.sin_family = AF_INET;
 
-    if (inet_pton(
-            AF_INET,
-            address,
-            &target.sin_addr
-        ) != 1) {
+    if (inet_pton(AF_INET, address, &target.sin_addr) != 1) {
         statistics.attempts = PING_ATTEMPTS;
         return statistics;
     }
@@ -242,20 +203,14 @@ PingStatistics measureTarget(const char* address) {
     for (int attempt = 0; attempt < PING_ATTEMPTS; ++attempt) {
         ++statistics.attempts;
 
-        const auto latency = pingTarget(
-            socketHandle.get(),
-            target,
-            static_cast<std::uint16_t>(attempt + 1)
-        );
+        const auto latency = pingTarget(socketHandle.get(), target, static_cast<std::uint16_t>(attempt + 1));
 
         if (latency.has_value()) {
             statistics.latencies.push_back(*latency);
         }
 
         if (attempt + 1 < PING_ATTEMPTS) {
-            std::this_thread::sleep_for(
-                std::chrono::milliseconds(PING_INTERVAL_MS)
-            );
+            std::this_thread::sleep_for(std::chrono::milliseconds(PING_INTERVAL_MS));
         }
     }
 
@@ -271,10 +226,7 @@ ConnectionInfo LinuxNetworkProbe::getConnectionInfo() const {
         return {};
     }
 
-    std::unique_ptr<ifaddrs, decltype(&freeifaddrs)> interfaces(
-        rawInterfaces,
-        &freeifaddrs
-    );
+    std::unique_ptr<ifaddrs, decltype(&freeifaddrs)> interfaces(rawInterfaces, &freeifaddrs);
 
     ConnectionInfo result{};
 
@@ -297,12 +249,7 @@ ConnectionInfo LinuxNetworkProbe::getConnectionInfo() const {
 
         char buffer[INET_ADDRSTRLEN]{};
 
-        if (inet_ntop(
-                AF_INET,
-                &address->sin_addr,
-                buffer,
-                sizeof(buffer)
-            ) == nullptr) {
+        if (inet_ntop(AF_INET, &address->sin_addr, buffer, sizeof(buffer)) == nullptr) {
             continue;
         }
 
@@ -344,10 +291,7 @@ NetworkMeasurement LinuxNetworkProbe::measure() {
 
         for (std::size_t i = 1; i < statistics.latencies.size(); ++i) {
 
-            totalJitter += std::abs(
-                statistics.latencies[i] -
-                statistics.latencies[i - 1]
-            );
+            totalJitter += std::abs(statistics.latencies[i] - statistics.latencies[i - 1]);
 
             ++jitterSamples;
         }
@@ -366,10 +310,7 @@ NetworkMeasurement LinuxNetworkProbe::measure() {
     if (totalAttempts > 0) {
         const int lostPings = totalAttempts - successfulPings;
 
-        measurement.packetLossPercent =
-            static_cast<double>(lostPings) /
-            static_cast<double>(totalAttempts) *
-            100.0;
+        measurement.packetLossPercent = static_cast<double>(lostPings) / static_cast<double>(totalAttempts) * 100.0;
     }
 
     return measurement;
