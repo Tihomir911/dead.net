@@ -523,8 +523,6 @@ bool performUpload(const SpeedTestServer& server,const SpeedTestConfig& config, 
         return false;
     }
 
-    const double durationSeconds = std::chrono::duration<double>(endTime - startTime ).count();
-
     double preTransferTime = 0.0;
     double startTransferTime = 0.0;
 
@@ -656,27 +654,6 @@ SpeedTestResult SpeedTest::run(
         }
 
     } catch (...) {
-    }
-
-        try {
-
-            const NetworkMeasurement measurement =
-            networkProbe_.measure();
-
-            result.latencyMs =
-                measurement.latencyMs;
-
-            result.jitterMs =
-                measurement.jitterMs;
-
-            result.packetLossPercent =
-                measurement.packetLossPercent;
-
-        } catch (const std::exception& exception) {
-            probeWarning = std::string("Network probe failed: ") +exception.what();
-
-    } catch (...) {
-        probeWarning = "Network probe failed with an unknown error";
     }
 
     try {
