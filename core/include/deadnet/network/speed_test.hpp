@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <functional>
 #include <string>
+#include <vector>
 
 namespace deadnet::network {
 
@@ -19,7 +20,17 @@ enum class SpeedTestStage : std::uint8_t {
     Failed
 };
 
+struct SpeedTestServer{
+
+    std::string name;
+    std::string downloadUrl;
+    std::string uploadeUrl;
+
+};
+
 struct SpeedTestConfig {
+
+    std::vector<SpeedTestServer> servers{ { "Cloudflare", "https://speed.cloudflare.com/__down", "https://speed.cloudflare.com/__up"}};
 
     std::string downloadUrl{"https://speed.cloudflare.com/__down"};
 
@@ -43,6 +54,8 @@ struct SpeedTestProgress {
     std::uint64_t transferredBytes{0};
 
     std::uint64_t totalBytes{0};
+
+    std::string serverName;
 };
 
 struct SpeedTestResult {
