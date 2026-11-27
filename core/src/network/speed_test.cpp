@@ -612,6 +612,42 @@ SpeedTestResult SpeedTest::run(
 
     std::string probeWarning;
 
+    SpeedTestProgress latencyProgress;
+
+    latencyProgress.stage = SpeedTestStage::Latency;
+
+    try {
+    
+        if (progressCallback) {
+
+            progressCallback(latencyProgress);
+
+        }
+
+    } catch (...) {
+    }
+
+        try {
+            
+            const NetworkMeasurement measurement =
+            networkProbe_.measure();
+
+            result.latencyMs =
+                measurement.latencyMs;
+
+            result.jitterMs =
+                measurement.jitterMs;
+
+            result.packetLossPercent =
+                measurement.packetLossPercent;
+
+        } catch (const std::exception& exception) {
+            probeWarning = std::string("Network probe failed: ") +exception.what();
+
+    } catch (...) {
+        probeWarning = "Network probe failed with an unknown error";
+    }
+
     try {
 
         const NetworkMeasurement measurement = networkProbe_.measure();
@@ -736,7 +772,7 @@ SpeedTestResult SpeedTest::run(
     completedProgress.serverName = result.server;
 
     try {
-        
+
         if (progressCallback) {
 
             progressCallback(completedProgress);
