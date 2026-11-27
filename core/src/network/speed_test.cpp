@@ -381,36 +381,53 @@ bool performDownload(const SpeedTestServer& server, const SpeedTestConfig& confi
         return false;
     }
 
-    curl_easy_setopt(handle.get(), CURLOPT_HTTPGET, 1L);
+        curl_easy_setopt(handle.get(), CURLOPT_HTTPGET, 1L);
 
-    const auto startTime = Clock::now();
+        const auto startTime = Clock::now();
 
-    const CURLcode transferResult = curl_easy_perform(handle.get());
+        const CURLcode transferResult = curl_easy_perform(handle.get());
 
-    const auto endTime = Clock::now();
+        const auto endTime = Clock::now();
 
-    if (transferResult != CURLE_OK) {
+        if (transferResult != CURLE_OK) {
 
-        error = curl_easy_strerror(transferResult);
+            error = curl_easy_strerror(transferResult);
 
+            return false;
+        }
+
+        if (!isSuccessfulHttpResponse(handle.get(), error)) {
+
+            return false;
+        }
+
+        const std::uint64_t receivedBytes = writeContext.transferredBytes;
+
+        if (receivedBytes != config.downloadBytes) {
+
+            error ="Incomplete download: expected " + std::to_string(config.downloadBytes) + " bytes, received " + std::to_string(receivedBytes);
+
+            return false;
+        }
+
+        double totalTime = 0.0;
+    double startTransferTime = 0.0;
+
+    const CURLcode totalTimeResult = curl_easy_getinfo(handle.get(), CURLINFO_TOTAL_TIME, &totalTime);
+
+    const CURLcode startTimeResult = curl_easy_getinfo(handle.get(), CURLINFO_STARTTRANSFER_TIME, &startTransferTime);
+
+    if (totalTimeResult != CURLE_OK || startTimeResult != CURLE_OK) {
+        error = "Could not retrieve download timing";
         return false;
     }
 
-    if (!isSuccessfulHttpResponse(handle.get(), error)) {
+    const double durationSeconds = totalTime - startTransferTime;
 
+    if (durationSeconds <= 0.0) {
+        error = "Invalid download duration";
         return false;
     }
-
-    const std::uint64_t receivedBytes = writeContext.transferredBytes;
-
-    if (receivedBytes != config.downloadBytes) {
-
-        error ="Incomplete download: expected " + std::to_string(config.downloadBytes) + " bytes, received " + std::to_string(receivedBytes);
-
-        return false;
-    }
-
-    const double durationSeconds = std::chrono::duration<double>(endTime - startTime).count();
 
     if (durationSeconds <= 0.0) {
         error = "Invalid download duration";
@@ -507,6 +524,20 @@ bool performUpload(const SpeedTestServer& server,const SpeedTestConfig& config, 
     }
 
     const double durationSeconds = std::chrono::duration<double>(endTime - startTime ).count();
+
+    double preTransferTime = 0.0;
+    double startTransferTime = 0.0;
+
+    const CURLcode preTransferResult = curl_easy_getinfo(handle.get(), CURLINFO_PRETRANSFER_TIME, &preTransferTime);
+
+    const CURLcode startTimeResult = curl_easy_getinfo(handle.get(), CURLINFO_STARTTRANSFER_TIME, &startTransferTime);
+
+    if (preTransferResult != CURLE_OK || startTimeResult != CURLE_OK) {
+        error = "Could not retrieve upload timing";
+        return false;
+    }
+
+    const double durationSeconds = startTransferTime - preTransferTime;
 
     if (durationSeconds <= 0.0) {
         error = "Invalid upload duration";
@@ -628,7 +659,7 @@ SpeedTestResult SpeedTest::run(
     }
 
         try {
-            
+
             const NetworkMeasurement measurement =
             networkProbe_.measure();
 
