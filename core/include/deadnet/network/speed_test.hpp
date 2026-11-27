@@ -20,11 +20,11 @@ enum class SpeedTestStage : std::uint8_t {
     Failed
 };
 
-struct SpeedTestServer{
-
+struct SpeedTestServer {
+    
     std::string name;
     std::string downloadUrl;
-    std::string uploadeUrl;
+    std::string uploadUrl;
 
 };
 
