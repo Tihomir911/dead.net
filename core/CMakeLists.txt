@@ -1,13 +1,21 @@
 add_library(deadnet_core STATIC
     src/common/version.cpp
     src/network/network_quality.cpp
+    src/network/speed_test.cpp
 )
 
- if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        target_sources(deadnet_core PRIVATE
-            src/network/linux_network_probe.cpp
-        )
-    endif()
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_sources(deadnet_core PRIVATE
+        src/network/linux_network_probe.cpp
+    )
+endif()
+
+find_package(CURL REQUIRED)
+
+target_link_libraries(deadnet_core
+    PRIVATE
+        CURL::libcurl
+)
 
 target_include_directories(deadnet_core
     PUBLIC
