@@ -141,7 +141,7 @@ void notifyProgress(ProgressContext& context, std::uint64_t transferredBytes) no
     }
 }
 
-std::size_t writeCallback(char* data, std::size_t size, std::size_t count, void* userData) noexcept {
+std::size_t writeCallback(char*, std::size_t size, std::size_t count, void* userData) noexcept {
 
     if (userData == nullptr) {
 
@@ -174,9 +174,9 @@ int progressCallback(
 
     void* userData,
 
-    curl_off_t downloadTotal,
+    curl_off_t ,
     curl_off_t downloadNow,
-    curl_off_t uploadTotal,
+    curl_off_t ,
     curl_off_t uploadNow
 
 ) noexcept {
@@ -220,7 +220,7 @@ bool configureCommonOptions(CURL* handle, const std::string& url, const SpeedTes
 
         curl_easy_setopt(handle, CURLOPT_MAXREDIRS, 3L) == CURLE_OK &&
 
-        curl_easy_setopt(handle, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTPS) == CURLE_OK &&
+        curl_easy_setopt(handle, CURLOPT_REDIR_PROTOCOLS_STR, "https") == CURLE_OK &&
 
         curl_easy_setopt(handle, CURLOPT_CONNECTTIMEOUT, config.connectTimeoutSeconds) == CURLE_OK &&
 
@@ -383,11 +383,7 @@ bool performDownload(const SpeedTestServer& server, const SpeedTestConfig& confi
 
         curl_easy_setopt(handle.get(), CURLOPT_HTTPGET, 1L);
 
-        const auto startTime = Clock::now();
-
         const CURLcode transferResult = curl_easy_perform(handle.get());
-
-        const auto endTime = Clock::now();
 
         if (transferResult != CURLE_OK) {
 
@@ -423,11 +419,6 @@ bool performDownload(const SpeedTestServer& server, const SpeedTestConfig& confi
     }
 
     const double durationSeconds = totalTime - startTransferTime;
-
-    if (durationSeconds <= 0.0) {
-        error = "Invalid download duration";
-        return false;
-    }
 
     if (durationSeconds <= 0.0) {
         error = "Invalid download duration";
