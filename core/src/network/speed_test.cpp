@@ -497,11 +497,7 @@ bool performUpload(const SpeedTestServer& server,const SpeedTestConfig& config, 
 
     curl_easy_setopt(handle.get(), CURLOPT_POSTFIELDSIZE_LARGE, static_cast<curl_off_t>(payload.size()));
 
-    const auto startTime = Clock::now();
-
     const CURLcode transferResult = curl_easy_perform(handle.get());
-
-    const auto endTime = Clock::now();
 
     curl_slist_free_all(headers);
 
