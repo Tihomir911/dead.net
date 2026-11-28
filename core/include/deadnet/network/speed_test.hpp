@@ -32,10 +32,6 @@ struct SpeedTestConfig {
 
     std::vector<SpeedTestServer> servers{ { "Cloudflare", "https://speed.cloudflare.com/__down", "https://speed.cloudflare.com/__up"}};
 
-    std::string downloadUrl{"https://speed.cloudflare.com/__down"};
-
-    std::string uploadUrl{"https://speed.cloudflare.com/__up"};
-
     std::uint64_t downloadBytes{10ULL * 1024ULL * 1024ULL};
 
     std::uint64_t uploadBytes{5ULL * 1024ULL * 1024ULL};
